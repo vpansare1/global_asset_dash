@@ -22,20 +22,21 @@ jobs:
           python-version: "3.11"
 
       - name: Install dependencies
+        working-directory: global_asset_dash
         run: |
           pip install -r requirements.txt
-          playwright install chromium --with-deps
+          playwright install --with-deps chromium
 
       - name: Run dashboard
-	working-directory: global_asset_dash
+        working-directory: global_asset_dash
         run: python dashboard.py --output-dir output
-	env:
-	  FRED_API_KEY: ${{ secrets.FRED_API_KEY }}
+        env:
+          FRED_API_KEY: ${{ secrets.FRED_API_KEY }}
 
       - name: Commit & push outputs
         run: |
           git config user.name  "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add output/
+          git add -A
           git diff --staged --quiet || git commit -m "chore: dashboard update $(date -u +%Y-%m-%d)"
           git push
