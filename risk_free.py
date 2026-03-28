@@ -76,7 +76,7 @@ def _cache_write(conn: sqlite3.Connection, series: pd.Series):
 # ── FRED fetch ────────────────────────────────────────────────────────────────
 
 def _fetch_from_fred(start: date, end: date) -> pd.Series:
-    url = FRED_URL.format(series=FRED_SERIES, start=start_date.isoformat(), end=end_date.isoformat(), api_key=FRED_API_KEY)
+    url = FRED_URL.format(series=FRED_SERIES, start=start.isoformat(), end=end.isoformat(), api_key=FRED_API_KEY)
     log.info("Fetching risk-free rate from FRED (%s) …", FRED_SERIES)
     resp = requests.get(url, timeout=15)
     resp.raise_for_status()
