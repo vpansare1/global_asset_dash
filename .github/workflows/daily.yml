@@ -22,13 +22,11 @@ jobs:
           python-version: "3.11"
 
       - name: Install dependencies
-        working-directory: global_asset_dash
         run: |
           pip install -r requirements.txt
           playwright install --with-deps chromium
 
       - name: Run dashboard
-        working-directory: global_asset_dash
         run: python dashboard.py --output-dir output
         env:
           FRED_API_KEY: ${{ secrets.FRED_API_KEY }}
