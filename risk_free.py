@@ -24,14 +24,15 @@ import requests
 log = logging.getLogger(__name__)
 
 FRED_SERIES = "DGS3MO"
+import os
+
 FRED_URL = (
     "https://api.stlouisfed.org/fred/series/observations"
     "?series_id={series}&observation_start={start}&observation_end={end}"
-    "&file_type=json&api_key=e432dc4571b7b2bc0fd977b9ebf2f7d5"
-    # ↑ FRED allows anonymous access via the public "free" key shown in their docs.
-    # Replace with your own key from https://fred.stlouisfed.org/docs/api/api_key.html
-    # (free, instant sign-up) for higher rate limits.
+    "&file_type=json&api_key={api_key}"
 )
+
+FRED_API_KEY = os.environ.get("FRED_API_KEY", "")
 
 CACHE_FILE = Path(__file__).parent / "price_cache.db"
 
@@ -75,11 +76,7 @@ def _cache_write(conn: sqlite3.Connection, series: pd.Series):
 # ── FRED fetch ────────────────────────────────────────────────────────────────
 
 def _fetch_from_fred(start: date, end: date) -> pd.Series:
-    url = FRED_URL.format(
-        series=FRED_SERIES,
-        start=start.isoformat(),
-        end=end.isoformat(),
-    )
+    url = FRED_URL.format(series=FRED_SERIES, start=start_date.isoformat(), end=end_date.isoformat(), api_key=FRED_API_KEY)
     log.info("Fetching risk-free rate from FRED (%s) …", FRED_SERIES)
     resp = requests.get(url, timeout=15)
     resp.raise_for_status()

@@ -27,7 +27,10 @@ jobs:
           playwright install chromium --with-deps
 
       - name: Run dashboard
+	working-directory: global_asset_dash
         run: python dashboard.py --output-dir output
+	env:
+	  FRED_API_KEY: ${{ secrets.FRED_API_KEY }}
 
       - name: Commit & push outputs
         run: |
