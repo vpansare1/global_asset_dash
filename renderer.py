@@ -36,6 +36,18 @@ def _momentum_color(value: float) -> str:
     return f"rgb({r},{g},{b})"
 
 
+
+def _drawdown_color(value: float) -> str:
+    """Red shading for drawdown cells; intensity scales with depth. Cap at -50%."""
+    if value is None or math.isnan(value) or value >= 0:
+        return "transparent"
+    cap = 0.50
+    intensity = min(abs(value) / cap, 1.0)
+    r = int(255 - intensity * 30)
+    g = int(255 - intensity * 110)
+    b = int(255 - intensity * 110)
+    return f"rgb({r},{g},{b})"
+
 def _fmt(value: Any, fmt_str: str) -> str:
     if value is None:
         return "—"
@@ -317,7 +329,23 @@ def render_html(sections: list[dict], metrics: list[dict], as_of: date, path: Pa
                 val = row.get(metric["label"])
                 display = _fmt(val, metric["fmt"])
                 data_val = f"{val:.6f}" if isinstance(val, float) else ""
-                if metric.get("color") and val is not None:
+                if metric.get("type") == "drawdown":
+                    # val is (float, date) tuple or None
+                    if val is not None:
+                        dd_pct, dd_date = val
+                        data_val = f"{dd_pct:.6f}"
+                        bg = _drawdown_color(dd_pct)
+                        pct_str = metric["fmt"].format(dd_pct)
+                        date_str = str(dd_date)
+                        inner = (
+                            f'<span class="cv cv-neg" style="background:{bg};min-width:110px">'
+                            f'{pct_str}<br><span style="font-size:9px;opacity:0.75">{date_str}</span>'
+                            f'</span>'
+                        )
+                    else:
+                        data_val = ""
+                        inner = '<span class="cv cv-neu">—</span>'
+                elif metric.get("color") and val is not None:
                     bg = _momentum_color(val)
                     css_class = "cv-pos" if val > 0 else "cv-neg"
                     inner = f'<span class="cv {css_class}" style="background:{bg}">{display}</span>'
@@ -373,7 +401,7 @@ def _try_playwright(html_path: Path, png_path: Path) -> bool:
         with sync_playwright() as p:
             browser = p.chromium.launch()
             page = browser.new_page(viewport={"width": 1600, "height": 900})
-            page.goto(html_path.resolve().as_uri())
+            page.goto(html_path.as_uri())
             page.wait_for_timeout(500)
             # expand to full page height
             height = page.evaluate("document.body.scrollHeight")
