@@ -401,7 +401,7 @@ def _try_playwright(html_path: Path, png_path: Path) -> bool:
         with sync_playwright() as p:
             browser = p.chromium.launch()
             page = browser.new_page(viewport={"width": 1600, "height": 900})
-            page.goto(html_path.as_uri())
+            page.goto(html_path.resolve().as_uri())
             page.wait_for_timeout(500)
             # expand to full page height
             height = page.evaluate("document.body.scrollHeight")
