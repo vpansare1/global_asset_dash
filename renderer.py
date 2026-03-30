@@ -140,6 +140,8 @@ _HTML_TEMPLATE = """\
   /* ── Single scrollable table wrapper ── */
   .tbl-wrap {{
     overflow-x: auto;
+    overflow-y: auto;
+    max-height: calc(100vh - 80px);
     border: 1px solid var(--border);
     border-radius: 6px;
   }}
