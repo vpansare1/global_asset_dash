@@ -16,6 +16,12 @@ CATEGORIES = [
         "icon": "📈",
         "tickers": ["VOO", "VEA", "VWO", "QVAL", "IVAL", "QMOM", "IMOM"],
     },
+    
+    {
+        "name": "Portable alpha",
+        "icon": "$$$",
+        "tickers": ["RSST", "RSSY", "RSSB", "MATE", "GDE"],   
+    },
     {
         "name": "Bonds",
         "icon": "🏦",
