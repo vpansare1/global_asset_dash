@@ -30,7 +30,7 @@ CATEGORIES = [
     {
         "name": "Alternatives",
         "icon": "⚡",
-        "tickers": ["GLD", "BTC-USD", "BTAL", "AHLT", "QMHIX"],
+        "tickers": ["GLD", "BTC-USD", "BTAL", "AHLT", "QMHIX", "ORR"],
     },
     {
         "name": "Low Beta",
