@@ -1,0 +1,287 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Momentum Dashboard – 2026-05-09</title>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg:      #0b0d11;
+    --surface: #12151c;
+    --border:  #1e2330;
+    --accent:  #3b82f6;
+    --text:    #cbd5e1;
+    --muted:   #475569;
+    --cat-bg:  #0f1117;
+  }
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 11px;
+    padding: 12px 16px 20px;
+  }
+
+  /* ── Top bar ── */
+  .topbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    margin-bottom: 10px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid var(--border);
+  }
+  .topbar h1 {
+    font-size: 13px;
+    font-weight: 500;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--accent);
+  }
+  .topbar .meta {
+    font-size: 10px;
+    color: var(--text);
+  }
+
+  /* ── Warning banners ── */
+  .warnings {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    margin-bottom: 8px;
+  }
+  .warn {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 5px 10px;
+    border-radius: 4px;
+    font-size: 10px;
+    font-weight: 500;
+    letter-spacing: 0.04em;
+    border: 1px solid;
+  }
+  .warn-rf {
+    background: rgba(234,179,8,0.12);
+    border-color: rgba(234,179,8,0.35);
+    color: #fde047;
+  }
+  .warn-data {
+    background: rgba(239,68,68,0.12);
+    border-color: rgba(239,68,68,0.35);
+    color: #fca5a5;
+  }
+  .warn-icon { font-size: 12px; flex-shrink: 0; }
+
+  /* ── Single scrollable table wrapper ── */
+  .tbl-wrap {
+    overflow-x: auto;
+    overflow-y: auto;
+    max-height: calc(100vh - 80px);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+  }
+
+  table {
+    border-collapse: collapse;
+    white-space: nowrap;
+    width: max-content;
+    min-width: 100%;
+  }
+
+  /* ── Column headers ── */
+  thead th {
+    background: var(--surface);
+    color: var(--text);
+    font-size: 10px;
+    font-weight: 500;
+    letter-spacing: 0.07em;
+    text-transform: uppercase;
+    padding: 5px 10px;
+    text-align: right;
+    cursor: pointer;
+    user-select: none;
+    border-bottom: 1px solid var(--border);
+    position: sticky;
+    top: 0;
+    z-index: 2;
+  }
+  thead th:first-child {
+    text-align: left;
+    position: sticky;
+    left: 0;
+    z-index: 3;
+    min-width: 90px;
+  }
+  thead th:hover { color: var(--text); }
+  thead th.sorted-asc::after  { content: " ▲"; font-size: 8px; }
+  thead th.sorted-desc::after { content: " ▼"; font-size: 8px; }
+
+  /* ── Category separator rows ── */
+  tr.cat-row td {
+    background: var(--cat-bg);
+    color: var(--text);
+    font-size: 9px;
+    font-weight: 500;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    padding: 4px 10px;
+    border-top: 1px solid var(--border);
+    border-bottom: 1px solid var(--border);
+  }
+  tr.cat-row:first-child td { border-top: none; }
+
+  /* ── Data rows ── */
+  tbody tr.data-row {
+    border-bottom: 1px solid var(--border);
+  }
+  tbody tr.data-row:last-child { border-bottom: none; }
+  tbody tr.data-row:hover { background: rgba(255,255,255,0.025); }
+
+  td {
+    padding: 3px 10px;
+    text-align: right;
+  }
+  td:first-child {
+    text-align: left;
+    font-weight: 500;
+    color: var(--text);
+    position: sticky;
+    left: 0;
+    background: var(--bg);
+    z-index: 1;
+    border-right: 1px solid var(--border);
+  }
+  tr.data-row:hover td:first-child { background: #0f1219; }
+
+  /* ── Coloured metric cells ── */
+  .cv {
+    display: inline-block;
+    min-width: 58px;
+    text-align: right;
+    padding: 1px 5px;
+    border-radius: 3px;
+    font-size: 11px;
+  }
+  .cv-pos { color: #052e16; }
+  .cv-neg { color: #450a0a; }
+  .cv-neu { color: var(--text); }
+
+  /* ── Footer ── */
+  .foot {
+    margin-top: 8px;
+    font-size: 9px;
+    color: var(--text);
+    letter-spacing: 0.04em;
+  }
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <h1>⚡ Momentum Dashboard</h1>
+  <span class="meta">As of 2026-05-09 · generated 2026-05-09 07:08 · click headers to sort</span>
+</div>
+
+
+<div class="tbl-wrap">
+  <table id="main">
+    <thead>
+      <tr>
+        <th data-col="ticker">Ticker</th>
+        <th>1M Mom</th>
+        <th>3M Mom</th>
+        <th>6M Mom</th>
+        <th>12M Mom</th>
+        <th>1+3+6M Comp</th>
+        <th>3+12M Comp</th>
+        <th>1M Sharpe</th>
+        <th>12M Sharpe</th>
+        <th>10Y Drawdown</th>
+        <th>SerCorr 21d</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr class="cat-row"><td colspan="11">📈 Global Equities</td></tr>
+      <tr class="data-row"><td data-val="VOO">VOO</td><td data-val="0.084829"><span class="cv cv-pos" style="background:rgb(226,246,226)">+8.5%</span></td><td data-val="0.065729"><span class="cv cv-pos" style="background:rgb(233,248,233)">+6.6%</span></td><td data-val="0.105716"><span class="cv cv-pos" style="background:rgb(219,244,219)">+10.6%</span></td><td data-val="0.322988"><span class="cv cv-pos" style="background:rgb(155,225,155)">+32.3%</span></td><td data-val="0.085425"><span class="cv cv-pos" style="background:rgb(226,246,226)">+8.5%</span></td><td data-val="0.194359"><span class="cv cv-pos" style="background:rgb(190,235,190)">+19.4%</span></td><td data-val="9.138327"><span class="cv cv-pos" style="background:rgb(155,225,155)">+9.14</span></td><td data-val="2.009117"><span class="cv cv-pos" style="background:rgb(155,225,155)">+2.01</span></td><td data-val="0.000000"><span class="cv cv-neg" style="background:transparent;min-width:110px">0.0%<br><span style="font-size:9px;opacity:0.75">2026-05-08</span></span></td><td data-val="-0.212539"><span class="cv cv-neu">-0.21</span></td></tr>
+      <tr class="data-row"><td data-val="VEA">VEA</td><td data-val="0.048557"><span class="cv cv-pos" style="background:rgb(238,250,238)">+4.9%</span></td><td data-val="0.037744"><span class="cv cv-pos" style="background:rgb(242,251,242)">+3.8%</span></td><td data-val="0.190413"><span class="cv cv-pos" style="background:rgb(191,235,191)">+19.0%</span></td><td data-val="0.361272"><span class="cv cv-pos" style="background:rgb(155,225,155)">+36.1%</span></td><td data-val="0.092238"><span class="cv cv-pos" style="background:rgb(224,245,224)">+9.2%</span></td><td data-val="0.199508"><span class="cv cv-pos" style="background:rgb(188,235,188)">+20.0%</span></td><td data-val="2.660484"><span class="cv cv-pos" style="background:rgb(155,225,155)">+2.66</span></td><td data-val="1.839255"><span class="cv cv-pos" style="background:rgb(155,225,155)">+1.84</span></td><td data-val="-0.000564"><span class="cv cv-neg" style="background:rgb(254,254,254);min-width:110px">-0.1%<br><span style="font-size:9px;opacity:0.75">2026-05-06</span></span></td><td data-val="-0.306659"><span class="cv cv-neu">-0.31</span></td></tr>
+      <tr class="data-row"><td data-val="VWO">VWO</td><td data-val="0.072644"><span class="cv cv-pos" style="background:rgb(230,247,230)">+7.3%</span></td><td data-val="0.048312"><span class="cv cv-pos" style="background:rgb(238,250,238)">+4.8%</span></td><td data-val="0.131832"><span class="cv cv-pos" style="background:rgb(211,241,211)">+13.2%</span></td><td data-val="0.345512"><span class="cv cv-pos" style="background:rgb(155,225,155)">+34.6%</span></td><td data-val="0.084263"><span class="cv cv-pos" style="background:rgb(226,246,226)">+8.4%</span></td><td data-val="0.196912"><span class="cv cv-pos" style="background:rgb(189,235,189)">+19.7%</span></td><td data-val="4.869895"><span class="cv cv-pos" style="background:rgb(155,225,155)">+4.87</span></td><td data-val="1.752786"><span class="cv cv-pos" style="background:rgb(155,225,155)">+1.75</span></td><td data-val="-0.003457"><span class="cv cv-neg" style="background:rgb(254,254,254);min-width:110px">-0.3%<br><span style="font-size:9px;opacity:0.75">2026-05-06</span></span></td><td data-val="-0.307354"><span class="cv cv-neu">-0.31</span></td></tr>
+      <tr class="data-row"><td data-val="QVAL">QVAL</td><td data-val="0.010479"><span class="cv cv-pos" style="background:rgb(251,253,251)">+1.0%</span></td><td data-val="0.021958"><span class="cv cv-pos" style="background:rgb(247,252,247)">+2.2%</span></td><td data-val="0.180536"><span class="cv cv-pos" style="background:rgb(194,236,194)">+18.1%</span></td><td data-val="0.296188"><span class="cv cv-pos" style="background:rgb(156,225,156)">+29.6%</span></td><td data-val="0.070991"><span class="cv cv-pos" style="background:rgb(231,247,231)">+7.1%</span></td><td data-val="0.159073"><span class="cv cv-pos" style="background:rgb(201,239,201)">+15.9%</span></td><td data-val="0.643620"><span class="cv cv-pos" style="background:rgb(155,225,155)">+0.64</span></td><td data-val="1.551681"><span class="cv cv-pos" style="background:rgb(155,225,155)">+1.55</span></td><td data-val="-0.015389"><span class="cv cv-neg" style="background:rgb(254,251,251);min-width:110px">-1.5%<br><span style="font-size:9px;opacity:0.75">2026-04-20</span></span></td><td data-val="-0.126061"><span class="cv cv-neu">-0.13</span></td></tr>
+      <tr class="data-row"><td data-val="IVAL">IVAL</td><td data-val="-0.002739"><span class="cv cv-neg" style="background:rgb(254,254,254)">-0.3%</span></td><td data-val="-0.009853"><span class="cv cv-neg" style="background:rgb(254,251,251)">-1.0%</span></td><td data-val="0.182988"><span class="cv cv-pos" style="background:rgb(194,236,194)">+18.3%</span></td><td data-val="0.355278"><span class="cv cv-pos" style="background:rgb(155,225,155)">+35.5%</span></td><td data-val="0.056799"><span class="cv cv-pos" style="background:rgb(236,249,236)">+5.7%</span></td><td data-val="0.172713"><span class="cv cv-pos" style="background:rgb(197,237,197)">+17.3%</span></td><td data-val="-0.346620"><span class="cv cv-neg" style="background:rgb(225,155,155)">-0.35</span></td><td data-val="1.809012"><span class="cv cv-pos" style="background:rgb(155,225,155)">+1.81</span></td><td data-val="-0.034016"><span class="cv cv-neg" style="background:rgb(252,247,247);min-width:110px">-3.4%<br><span style="font-size:9px;opacity:0.75">2026-02-27</span></span></td><td data-val="-0.194134"><span class="cv cv-neu">-0.19</span></td></tr>
+      <tr class="data-row"><td data-val="QMOM">QMOM</td><td data-val="0.067682"><span class="cv cv-pos" style="background:rgb(232,248,232)">+6.8%</span></td><td data-val="0.106081"><span class="cv cv-pos" style="background:rgb(219,244,219)">+10.6%</span></td><td data-val="0.206419"><span class="cv cv-pos" style="background:rgb(186,234,186)">+20.6%</span></td><td data-val="0.323870"><span class="cv cv-pos" style="background:rgb(155,225,155)">+32.4%</span></td><td data-val="0.126727"><span class="cv cv-pos" style="background:rgb(212,242,212)">+12.7%</span></td><td data-val="0.214976"><span class="cv cv-pos" style="background:rgb(183,233,183)">+21.5%</span></td><td data-val="2.835755"><span class="cv cv-pos" style="background:rgb(155,225,155)">+2.84</span></td><td data-val="1.178206"><span class="cv cv-pos" style="background:rgb(155,225,155)">+1.18</span></td><td data-val="-0.021030"><span class="cv cv-neg" style="background:rgb(253,250,250);min-width:110px">-2.1%<br><span style="font-size:9px;opacity:0.75">2026-05-06</span></span></td><td data-val="-0.294036"><span class="cv cv-neu">-0.29</span></td></tr>
+      <tr class="data-row"><td data-val="IMOM">IMOM</td><td data-val="0.044807"><span class="cv cv-pos" style="background:rgb(240,250,240)">+4.5%</span></td><td data-val="0.028636"><span class="cv cv-pos" style="background:rgb(245,252,245)">+2.9%</span></td><td data-val="0.257360"><span class="cv cv-pos" style="background:rgb(169,229,169)">+25.7%</span></td><td data-val="0.531448"><span class="cv cv-pos" style="background:rgb(155,225,155)">+53.1%</span></td><td data-val="0.110268"><span class="cv cv-pos" style="background:rgb(218,243,218)">+11.0%</span></td><td data-val="0.280042"><span class="cv cv-pos" style="background:rgb(161,226,161)">+28.0%</span></td><td data-val="2.632188"><span class="cv cv-pos" style="background:rgb(155,225,155)">+2.63</span></td><td data-val="2.103563"><span class="cv cv-pos" style="background:rgb(155,225,155)">+2.10</span></td><td data-val="-0.006018"><span class="cv cv-neg" style="background:rgb(254,253,253);min-width:110px">-0.6%<br><span style="font-size:9px;opacity:0.75">2026-05-06</span></span></td><td data-val="-0.392405"><span class="cv cv-neu">-0.39</span></td></tr>
+      <tr class="cat-row"><td colspan="11">$$$ Portable alpha</td></tr>
+      <tr class="data-row"><td data-val="RSST">RSST</td><td data-val="0.105908"><span class="cv cv-pos" style="background:rgb(219,244,219)">+10.6%</span></td><td data-val="0.083246"><span class="cv cv-pos" style="background:rgb(227,246,227)">+8.3%</span></td><td data-val="0.224237"><span class="cv cv-pos" style="background:rgb(180,232,180)">+22.4%</span></td><td data-val="0.596424"><span class="cv cv-pos" style="background:rgb(155,225,155)">+59.6%</span></td><td data-val="0.137797"><span class="cv cv-pos" style="background:rgb(209,241,209)">+13.8%</span></td><td data-val="0.339835"><span class="cv cv-pos" style="background:rgb(155,225,155)">+34.0%</span></td><td data-val="10.357240"><span class="cv cv-pos" style="background:rgb(155,225,155)">+10.36</span></td><td data-val="2.042504"><span class="cv cv-pos" style="background:rgb(155,225,155)">+2.04</span></td><td data-val="0.000000"><span class="cv cv-neg" style="background:transparent;min-width:110px">0.0%<br><span style="font-size:9px;opacity:0.75">2026-05-08</span></span></td><td data-val="-0.392753"><span class="cv cv-neu">-0.39</span></td></tr>
+      <tr class="data-row"><td data-val="RSSY">RSSY</td><td data-val="0.091026"><span class="cv cv-pos" style="background:rgb(224,245,224)">+9.1%</span></td><td data-val="0.256677"><span class="cv cv-pos" style="background:rgb(169,229,169)">+25.7%</span></td><td data-val="0.284449"><span class="cv cv-pos" style="background:rgb(160,226,160)">+28.4%</span></td><td data-val="0.540942"><span class="cv cv-pos" style="background:rgb(155,225,155)">+54.1%</span></td><td data-val="0.210717"><span class="cv cv-pos" style="background:rgb(184,233,184)">+21.1%</span></td><td data-val="0.398809"><span class="cv cv-pos" style="background:rgb(155,225,155)">+39.9%</span></td><td data-val="10.699680"><span class="cv cv-pos" style="background:rgb(155,225,155)">+10.70</span></td><td data-val="2.842130"><span class="cv cv-pos" style="background:rgb(155,225,155)">+2.84</span></td><td data-val="0.000000"><span class="cv cv-neg" style="background:transparent;min-width:110px">0.0%<br><span style="font-size:9px;opacity:0.75">2026-05-08</span></span></td><td data-val="-0.541219"><span class="cv cv-neu">-0.54</span></td></tr>
+      <tr class="data-row"><td data-val="RSSB">RSSB</td><td data-val="0.069605"><span class="cv cv-pos" style="background:rgb(231,248,231)">+7.0%</span></td><td data-val="0.038723"><span class="cv cv-pos" style="background:rgb(242,251,242)">+3.9%</span></td><td data-val="0.113002"><span class="cv cv-pos" style="background:rgb(217,243,217)">+11.3%</span></td><td data-val="0.322941"><span class="cv cv-pos" style="background:rgb(155,225,155)">+32.3%</span></td><td data-val="0.073777"><span class="cv cv-pos" style="background:rgb(230,247,230)">+7.4%</span></td><td data-val="0.180832"><span class="cv cv-pos" style="background:rgb(194,236,194)">+18.1%</span></td><td data-val="4.725042"><span class="cv cv-pos" style="background:rgb(155,225,155)">+4.73</span></td><td data-val="1.659885"><span class="cv cv-pos" style="background:rgb(155,225,155)">+1.66</span></td><td data-val="0.000000"><span class="cv cv-neg" style="background:transparent;min-width:110px">0.0%<br><span style="font-size:9px;opacity:0.75">2026-05-08</span></span></td><td data-val="-0.221583"><span class="cv cv-neu">-0.22</span></td></tr>
+      <tr class="data-row"><td data-val="MATE">MATE</td><td data-val="0.103936"><span class="cv cv-pos" style="background:rgb(220,244,220)">+10.4%</span></td><td data-val="0.051100"><span class="cv cv-pos" style="background:rgb(237,249,237)">+5.1%</span></td><td data-val=""><span class="cv cv-neu">—</span></td><td data-val=""><span class="cv cv-neu">—</span></td><td data-val=""><span class="cv cv-neu">—</span></td><td data-val=""><span class="cv cv-neu">—</span></td><td data-val="10.917815"><span class="cv cv-pos" style="background:rgb(155,225,155)">+10.92</span></td><td data-val="2.052375"><span class="cv cv-pos" style="background:rgb(155,225,155)">+2.05</span></td><td data-val="0.000000"><span class="cv cv-neg" style="background:transparent;min-width:110px">0.0%<br><span style="font-size:9px;opacity:0.75">2026-05-08</span></span></td><td data-val="-0.244991"><span class="cv cv-neu">-0.24</span></td></tr>
+      <tr class="data-row"><td data-val="GDE">GDE</td><td data-val="0.063605"><span class="cv cv-pos" style="background:rgb(233,248,233)">+6.4%</span></td><td data-val="-0.022222"><span class="cv cv-neg" style="background:rgb(252,247,247)">-2.2%</span></td><td data-val="0.237369"><span class="cv cv-pos" style="background:rgb(175,231,175)">+23.7%</span></td><td data-val="0.691879"><span class="cv cv-pos" style="background:rgb(155,225,155)">+69.2%</span></td><td data-val="0.092917"><span class="cv cv-pos" style="background:rgb(224,245,224)">+9.3%</span></td><td data-val="0.334828"><span class="cv cv-pos" style="background:rgb(155,225,155)">+33.5%</span></td><td data-val="2.666343"><span class="cv cv-pos" style="background:rgb(155,225,155)">+2.67</span></td><td data-val="1.868168"><span class="cv cv-pos" style="background:rgb(155,225,155)">+1.87</span></td><td data-val="-0.075630"><span class="cv cv-neg" style="background:rgb(250,238,238);min-width:110px">-7.6%<br><span style="font-size:9px;opacity:0.75">2026-01-28</span></span></td><td data-val="-0.129748"><span class="cv cv-neu">-0.13</span></td></tr>
+      <tr class="cat-row"><td colspan="11">🏦 Bonds</td></tr>
+      <tr class="data-row"><td data-val="SGOV">SGOV</td><td data-val="0.003169"><span class="cv cv-pos" style="background:rgb(253,254,253)">+0.3%</span></td><td data-val="0.008924"><span class="cv cv-pos" style="background:rgb(252,254,252)">+0.9%</span></td><td data-val="0.018357"><span class="cv cv-pos" style="background:rgb(248,253,248)">+1.8%</span></td><td data-val="0.039872"><span class="cv cv-pos" style="background:rgb(241,251,241)">+4.0%</span></td><td data-val="0.010150"><span class="cv cv-pos" style="background:rgb(251,253,251)">+1.0%</span></td><td data-val="0.024398"><span class="cv cv-pos" style="background:rgb(246,252,246)">+2.4%</span></td><td data-val="0.534869"><span class="cv cv-pos" style="background:rgb(155,225,155)">+0.53</span></td><td data-val="-0.192322"><span class="cv cv-neg" style="background:rgb(235,190,190)">-0.19</span></td><td data-val="0.000000"><span class="cv cv-neg" style="background:transparent;min-width:110px">0.0%<br><span style="font-size:9px;opacity:0.75">2026-05-08</span></span></td><td data-val="-0.490137"><span class="cv cv-neu">-0.49</span></td></tr>
+      <tr class="data-row"><td data-val="VGSH">VGSH</td><td data-val="0.001354"><span class="cv cv-pos" style="background:rgb(254,254,254)">+0.1%</span></td><td data-val="0.001792"><span class="cv cv-pos" style="background:rgb(254,254,254)">+0.2%</span></td><td data-val="0.011726"><span class="cv cv-pos" style="background:rgb(251,253,251)">+1.2%</span></td><td data-val="0.036289"><span class="cv cv-pos" style="background:rgb(242,251,242)">+3.6%</span></td><td data-val="0.004957"><span class="cv cv-pos" style="background:rgb(253,254,253)">+0.5%</span></td><td data-val="0.019041"><span class="cv cv-pos" style="background:rgb(248,253,248)">+1.9%</span></td><td data-val="-1.540499"><span class="cv cv-neg" style="background:rgb(225,155,155)">-1.54</span></td><td data-val="-0.287486"><span class="cv cv-neg" style="background:rgb(226,159,159)">-0.29</span></td><td data-val="-0.002113"><span class="cv cv-neg" style="background:rgb(254,254,254);min-width:110px">-0.2%<br><span style="font-size:9px;opacity:0.75">2026-02-27</span></span></td><td data-val="-0.182081"><span class="cv cv-neu">-0.18</span></td></tr>
+      <tr class="data-row"><td data-val="VGIT">VGIT</td><td data-val="-0.001220"><span class="cv cv-neg" style="background:rgb(254,254,254)">-0.1%</span></td><td data-val="-0.002236"><span class="cv cv-neg" style="background:rgb(254,254,254)">-0.2%</span></td><td data-val="0.004447"><span class="cv cv-pos" style="background:rgb(253,254,253)">+0.4%</span></td><td data-val="0.041366"><span class="cv cv-pos" style="background:rgb(241,250,241)">+4.1%</span></td><td data-val="0.000330"><span class="cv cv-pos" style="background:rgb(254,254,254)">+0.0%</span></td><td data-val="0.019565"><span class="cv cv-pos" style="background:rgb(248,253,248)">+2.0%</span></td><td data-val="-1.546281"><span class="cv cv-neg" style="background:rgb(225,155,155)">-1.55</span></td><td data-val="0.048292"><span class="cv cv-pos" style="background:rgb(238,250,238)">+0.05</span></td><td data-val="-0.018473"><span class="cv cv-neg" style="background:rgb(253,250,250);min-width:110px">-1.8%<br><span style="font-size:9px;opacity:0.75">2020-08-04</span></span></td><td data-val="-0.238046"><span class="cv cv-neu">-0.24</span></td></tr>
+      <tr class="data-row"><td data-val="GOVZ">GOVZ</td><td data-val="-0.007249"><span class="cv cv-neg" style="background:rgb(254,252,252)">-0.7%</span></td><td data-val="-0.010684"><span class="cv cv-neg" style="background:rgb(253,251,251)">-1.1%</span></td><td data-val="-0.049770"><span class="cv cv-neg" style="background:rgb(250,238,238)">-5.0%</span></td><td data-val="0.001384"><span class="cv cv-pos" style="background:rgb(254,254,254)">+0.1%</span></td><td data-val="-0.022568"><span class="cv cv-neg" style="background:rgb(252,247,247)">-2.3%</span></td><td data-val="-0.004650"><span class="cv cv-neg" style="background:rgb(254,253,253)">-0.5%</span></td><td data-val="-0.943500"><span class="cv cv-neg" style="background:rgb(225,155,155)">-0.94</span></td><td data-val="-0.144783"><span class="cv cv-neg" style="background:rgb(240,206,206)">-0.14</span></td><td data-val="-0.562706"><span class="cv cv-neg" style="background:rgb(225,145,145);min-width:110px">-56.3%<br><span style="font-size:9px;opacity:0.75">2020-09-25</span></span></td><td data-val="-0.358644"><span class="cv cv-neu">-0.36</span></td></tr>
+      <tr class="cat-row"><td colspan="11">⚡ Alternatives</td></tr>
+      <tr class="data-row"><td data-val="GLD">GLD</td><td data-val="-0.009454"><span class="cv cv-neg" style="background:rgb(254,251,251)">-0.9%</span></td><td data-val="-0.071216"><span class="cv cv-neg" style="background:rgb(247,231,231)">-7.1%</span></td><td data-val="0.177731"><span class="cv cv-pos" style="background:rgb(195,237,195)">+17.8%</span></td><td data-val="0.413668"><span class="cv cv-pos" style="background:rgb(155,225,155)">+41.4%</span></td><td data-val="0.032354"><span class="cv cv-pos" style="background:rgb(244,251,244)">+3.2%</span></td><td data-val="0.171226"><span class="cv cv-pos" style="background:rgb(197,237,197)">+17.1%</span></td><td data-val="-0.552123"><span class="cv cv-neg" style="background:rgb(225,155,155)">-0.55</span></td><td data-val="1.280456"><span class="cv cv-pos" style="background:rgb(155,225,155)">+1.28</span></td><td data-val="-0.125287"><span class="cv cv-neg" style="background:rgb(247,227,227);min-width:110px">-12.5%<br><span style="font-size:9px;opacity:0.75">2026-01-29</span></span></td><td data-val="-0.111095"><span class="cv cv-neu">-0.11</span></td></tr>
+      <tr class="data-row"><td data-val="BTC-USD">BTC-USD</td><td data-val="0.116917"><span class="cv cv-pos" style="background:rgb(216,243,216)">+11.7%</span></td><td data-val="0.143152"><span class="cv cv-pos" style="background:rgb(207,240,207)">+14.3%</span></td><td data-val="-0.234540"><span class="cv cv-neg" style="background:rgb(231,176,176)">-23.5%</span></td><td data-val="-0.221540"><span class="cv cv-neg" style="background:rgb(232,181,181)">-22.2%</span></td><td data-val="0.008510"><span class="cv cv-pos" style="background:rgb(252,254,252)">+0.9%</span></td><td data-val="-0.039194"><span class="cv cv-neg" style="background:rgb(251,241,241)">-3.9%</span></td><td data-val="3.326509"><span class="cv cv-pos" style="background:rgb(155,225,155)">+3.33</span></td><td data-val="-0.429095"><span class="cv cv-neg" style="background:rgb(225,155,155)">-0.43</span></td><td data-val="-0.357458"><span class="cv cv-neg" style="background:rgb(233,176,176);min-width:110px">-35.7%<br><span style="font-size:9px;opacity:0.75">2025-10-06</span></span></td><td data-val="0.114931"><span class="cv cv-neu">+0.11</span></td></tr>
+      <tr class="data-row"><td data-val="BTAL">BTAL</td><td data-val="-0.110947"><span class="cv cv-neg" style="background:rgb(243,218,218)">-11.1%</span></td><td data-val="-0.130246"><span class="cv cv-neg" style="background:rgb(241,211,211)">-13.0%</span></td><td data-val="-0.189305"><span class="cv cv-neg" style="background:rgb(236,191,191)">-18.9%</span></td><td data-val="-0.371618"><span class="cv cv-neg" style="background:rgb(225,155,155)">-37.2%</span></td><td data-val="-0.143499"><span class="cv cv-neg" style="background:rgb(240,207,207)">-14.3%</span></td><td data-val="-0.250932"><span class="cv cv-neg" style="background:rgb(229,171,171)">-25.1%</span></td><td data-val="-5.936761"><span class="cv cv-neg" style="background:rgb(225,155,155)">-5.94</span></td><td data-val="-2.251219"><span class="cv cv-neg" style="background:rgb(225,155,155)">-2.25</span></td><td data-val="-0.479365"><span class="cv cv-neg" style="background:rgb(226,149,149);min-width:110px">-47.9%<br><span style="font-size:9px;opacity:0.75">2020-03-12</span></span></td><td data-val="-0.241754"><span class="cv cv-neu">-0.24</span></td></tr>
+      <tr class="data-row"><td data-val="AHLT">AHLT</td><td data-val="0.028344"><span class="cv cv-pos" style="background:rgb(245,252,245)">+2.8%</span></td><td data-val="-0.001683"><span class="cv cv-neg" style="background:rgb(254,254,254)">-0.2%</span></td><td data-val="0.192244"><span class="cv cv-pos" style="background:rgb(190,235,190)">+19.2%</span></td><td data-val="0.367996"><span class="cv cv-pos" style="background:rgb(155,225,155)">+36.8%</span></td><td data-val="0.072968"><span class="cv cv-pos" style="background:rgb(230,247,230)">+7.3%</span></td><td data-val="0.183156"><span class="cv cv-pos" style="background:rgb(193,236,193)">+18.3%</span></td><td data-val="4.974473"><span class="cv cv-pos" style="background:rgb(155,225,155)">+4.97</span></td><td data-val="1.686446"><span class="cv cv-pos" style="background:rgb(155,225,155)">+1.69</span></td><td data-val="-0.022502"><span class="cv cv-neg" style="background:rgb(253,250,250);min-width:110px">-2.3%<br><span style="font-size:9px;opacity:0.75">2026-01-29</span></span></td><td data-val="-0.351007"><span class="cv cv-neu">-0.35</span></td></tr>
+      <tr class="data-row"><td data-val="QMHIX">QMHIX</td><td data-val="0.007951"><span class="cv cv-pos" style="background:rgb(252,254,252)">+0.8%</span></td><td data-val="0.050645"><span class="cv cv-pos" style="background:rgb(238,249,238)">+5.1%</span></td><td data-val="0.179964"><span class="cv cv-pos" style="background:rgb(195,237,195)">+18.0%</span></td><td data-val="0.347945"><span class="cv cv-pos" style="background:rgb(155,225,155)">+34.8%</span></td><td data-val="0.079520"><span class="cv cv-pos" style="background:rgb(228,247,228)">+8.0%</span></td><td data-val="0.199295"><span class="cv cv-pos" style="background:rgb(188,235,188)">+19.9%</span></td><td data-val="0.469528"><span class="cv cv-pos" style="background:rgb(155,225,155)">+0.47</span></td><td data-val="2.063668"><span class="cv cv-pos" style="background:rgb(155,225,155)">+2.06</span></td><td data-val="-0.009549"><span class="cv cv-neg" style="background:rgb(254,252,252);min-width:110px">-1.0%<br><span style="font-size:9px;opacity:0.75">2026-04-29</span></span></td><td data-val="0.075257"><span class="cv cv-neu">+0.08</span></td></tr>
+      <tr class="data-row"><td data-val="ORR">ORR</td><td data-val="-0.017030"><span class="cv cv-neg" style="background:rgb(253,249,249)">-1.7%</span></td><td data-val="-0.028662"><span class="cv cv-neg" style="background:rgb(252,245,245)">-2.9%</span></td><td data-val="0.149740"><span class="cv cv-pos" style="background:rgb(205,240,205)">+15.0%</span></td><td data-val="0.325915"><span class="cv cv-pos" style="background:rgb(155,225,155)">+32.6%</span></td><td data-val="0.034683"><span class="cv cv-pos" style="background:rgb(243,251,243)">+3.5%</span></td><td data-val="0.148627"><span class="cv cv-pos" style="background:rgb(205,240,205)">+14.9%</span></td><td data-val="-1.296424"><span class="cv cv-neg" style="background:rgb(225,155,155)">-1.30</span></td><td data-val="1.888986"><span class="cv cv-pos" style="background:rgb(155,225,155)">+1.89</span></td><td data-val="-0.054760"><span class="cv cv-neg" style="background:rgb(251,242,242);min-width:110px">-5.5%<br><span style="font-size:9px;opacity:0.75">2026-02-27</span></span></td><td data-val="-0.144077"><span class="cv cv-neu">-0.14</span></td></tr>
+      <tr class="cat-row"><td colspan="11">🛡️ Low Beta</td></tr>
+      <tr class="data-row"><td data-val="XLU">XLU</td><td data-val="-0.051538"><span class="cv cv-neg" style="background:rgb(249,237,237)">-5.2%</span></td><td data-val="0.035710"><span class="cv cv-pos" style="background:rgb(243,251,243)">+3.6%</span></td><td data-val="0.011708"><span class="cv cv-pos" style="background:rgb(251,253,251)">+1.2%</span></td><td data-val="0.146375"><span class="cv cv-pos" style="background:rgb(206,240,206)">+14.6%</span></td><td data-val="-0.001373"><span class="cv cv-neg" style="background:rgb(254,254,254)">-0.1%</span></td><td data-val="0.091042"><span class="cv cv-pos" style="background:rgb(224,245,224)">+9.1%</span></td><td data-val="-3.588780"><span class="cv cv-neg" style="background:rgb(225,155,155)">-3.59</span></td><td data-val="0.752271"><span class="cv cv-pos" style="background:rgb(155,225,155)">+0.75</span></td><td data-val="-0.056513"><span class="cv cv-neg" style="background:rgb(251,242,242);min-width:110px">-5.7%<br><span style="font-size:9px;opacity:0.75">2026-02-27</span></span></td><td data-val="-0.055841"><span class="cv cv-neu">-0.06</span></td></tr>
+      <tr class="data-row"><td data-val="XLV">XLV</td><td data-val="-0.039108"><span class="cv cv-neg" style="background:rgb(251,241,241)">-3.9%</span></td><td data-val="-0.078302"><span class="cv cv-neg" style="background:rgb(247,228,228)">-7.8%</span></td><td data-val="-0.009899"><span class="cv cv-neg" style="background:rgb(254,251,251)">-1.0%</span></td><td data-val="0.100762"><span class="cv cv-pos" style="background:rgb(221,244,221)">+10.1%</span></td><td data-val="-0.042436"><span class="cv cv-neg" style="background:rgb(250,240,240)">-4.2%</span></td><td data-val="0.011230"><span class="cv cv-pos" style="background:rgb(251,253,251)">+1.1%</span></td><td data-val="-3.542422"><span class="cv cv-neg" style="background:rgb(225,155,155)">-3.54</span></td><td data-val="0.445951"><span class="cv cv-pos" style="background:rgb(155,225,155)">+0.45</span></td><td data-val="-0.100625"><span class="cv cv-neg" style="background:rgb(248,232,232);min-width:110px">-10.1%<br><span style="font-size:9px;opacity:0.75">2026-02-27</span></span></td><td data-val="-0.269245"><span class="cv cv-neu">-0.27</span></td></tr>
+      <tr class="data-row"><td data-val="XLP">XLP</td><td data-val="0.008748"><span class="cv cv-pos" style="background:rgb(252,254,252)">+0.9%</span></td><td data-val="-0.031753"><span class="cv cv-neg" style="background:rgb(251,244,244)">-3.2%</span></td><td data-val="0.112410"><span class="cv cv-pos" style="background:rgb(217,243,217)">+11.2%</span></td><td data-val="0.069187"><span class="cv cv-pos" style="background:rgb(231,248,231)">+6.9%</span></td><td data-val="0.029802"><span class="cv cv-pos" style="background:rgb(245,252,245)">+3.0%</span></td><td data-val="0.018717"><span class="cv cv-pos" style="background:rgb(248,253,248)">+1.9%</span></td><td data-val="0.570508"><span class="cv cv-pos" style="background:rgb(155,225,155)">+0.57</span></td><td data-val="0.282240"><span class="cv cv-pos" style="background:rgb(160,226,160)">+0.28</span></td><td data-val="-0.059506"><span class="cv cv-neg" style="background:rgb(251,241,241);min-width:110px">-6.0%<br><span style="font-size:9px;opacity:0.75">2026-02-27</span></span></td><td data-val="-0.091569"><span class="cv cv-neu">-0.09</span></td></tr>
+    </tbody>
+  </table>
+</div>
+
+<div class="foot">
+  Data: Yahoo Finance via yfinance · Momentum = total return · Sharpe annualised, rf = 3.69% (FRED DGS3MO) · SerCorr = lag-1 autocorrelation 21-day window
+</div>
+
+<script>
+(function () {
+  const tbl = document.getElementById('main');
+  const headers = Array.from(tbl.querySelectorAll('thead th'));
+  let sortCol = -1, sortDir = 1;
+
+  headers.forEach(function (th, colIdx) {
+    th.addEventListener('click', function () {
+      if (sortCol === colIdx) { sortDir *= -1; } else { sortCol = colIdx; sortDir = 1; }
+      headers.forEach(function (h) { h.classList.remove('sorted-asc', 'sorted-desc'); });
+      th.classList.add(sortDir === 1 ? 'sorted-asc' : 'sorted-desc');
+
+      const tbody = tbl.querySelector('tbody');
+      // Collect data rows grouped by their preceding cat row
+      const children = Array.from(tbody.children);
+      const groups = [];
+      let current = null;
+      children.forEach(function (row) {
+        if (row.classList.contains('cat-row')) {
+          current = { header: row, rows: [] };
+          groups.push(current);
+        } else if (current) {
+          current.rows.push(row);
+        }
+      });
+
+      groups.forEach(function (g) {
+        g.rows.sort(function (a, b) {
+          const aVal = a.cells[colIdx] ? a.cells[colIdx].getAttribute('data-val') : '';
+          const bVal = b.cells[colIdx] ? b.cells[colIdx].getAttribute('data-val') : '';
+          const aN = parseFloat(aVal), bN = parseFloat(bVal);
+          if (!isNaN(aN) && !isNaN(bN)) return sortDir * (aN - bN);
+          return sortDir * String(aVal).localeCompare(String(bVal));
+        });
+        tbody.appendChild(g.header);
+        g.rows.forEach(function (r) { tbody.appendChild(r); });
+      });
+    });
+  });
+})();
+</script>
+</body>
+</html>
